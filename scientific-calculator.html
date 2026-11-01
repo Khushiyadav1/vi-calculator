@@ -18,7 +18,7 @@
 
         .display { width: 100%; height: 70px; font-size: 2.2rem; text-align: right; background: #000000; color: #FFFF00; border: 3px solid #FFFF00; padding: 10px; box-sizing: border-box; margin-bottom: 20px; font-family: monospace; }
         
-        /* 5 Perfectly balanced columns */
+        /* 5 Completely symmetric columns: 1 column for functions, 3 for numpad, 1 for basic ops */
         .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
         
         button.calc-key { padding: 18px 10px; font-size: 1.4rem; font-weight: bold; background: #2D2D2D; color: #FFFFFF; border: 2px solid #888888; border-radius: 8px; cursor: pointer; }
@@ -55,38 +55,39 @@
         <main id="panel-calc" class="module-panel active" role="tabpanel" aria-labelledby="tab-calc">
             <input type="text" id="calc-display" class="display" readonly aria-label="Calculator screen display" value="0">
             <div class="grid">
-                <!-- Row 1: Advanced Functions & Clear Header -->
+                <!-- Row 1: Trigonometry & Utilities -->
                 <button class="calc-key trig-key" onclick="inputFunc('sin')" aria-label="Sine">sin</button>
                 <button class="calc-key trig-key" onclick="inputFunc('cos')" aria-label="Cosine">cos</button>
                 <button class="calc-key trig-key" onclick="inputFunc('tan')" aria-label="Tangent">tan</button>
-                <button class="calc-key trig-key" onclick="inputFunc('log')" aria-label="Logarithm base 10">log</button>
+                <button class="calc-key action-key" onclick="backspace()" aria-label="Backspace delete last character">⌫</button>
                 <button class="calc-key action-key" onclick="clearDisplay()" aria-label="Clear all content">Clear</button>
 
-                <!-- Row 2: Scientific Operator | Numpad 7-8-9 | Divide -->
-                <button class="calc-key op-key" onclick="inputFunc('sqrt')" aria-label="Square Root">√</button>
+                <!-- Row 2: Advanced Math | Numpad 7-8-9 | Basic Op -->
+                <button class="calc-key trig-key" onclick="inputFunc('log')" aria-label="Logarithm base 10">log</button>
                 <button class="calc-key" onclick="inputNum('7')">7</button>
                 <button class="calc-key" onclick="inputNum('8')">8</button>
                 <button class="calc-key" onclick="inputNum('9')">9</button>
                 <button class="calc-key op-key" onclick="inputOp('/')" aria-label="Divided by">/</button>
 
-                <!-- Row 3: Scientific Operator | Numpad 4-5-6 | Multiply -->
-                <button class="calc-key op-key" onclick="inputOp('**')" aria-label="Raised to the power of">^</button>
+                <!-- Row 3: Advanced Math | Numpad 4-5-6 | Basic Op -->
+                <button class="calc-key op-key" onclick="inputFunc('sqrt')" aria-label="Square Root">√</button>
                 <button class="calc-key" onclick="inputNum('4')">4</button>
                 <button class="calc-key" onclick="inputNum('5')">5</button>
                 <button class="calc-key" onclick="inputNum('6')">6</button>
                 <button class="calc-key op-key" onclick="inputOp('*')" aria-label="Multiplied by">×</button>
 
-                <!-- Row 4: Scientific Operator | Numpad 1-2-3 | Minus -->
-                <button class="calc-key op-key" onclick="inputConst('Math.PI')" aria-label="Pi constant">π</button>
+                <!-- Row 4: Advanced Math | Numpad 1-2-3 | Basic Op -->
+                <button class="calc-key op-key" onclick="inputOp('**')" aria-label="Raised to the power of">^</button>
                 <button class="calc-key" onclick="inputNum('1')">1</button>
                 <button class="calc-key" onclick="inputNum('2')">2</button>
                 <button class="calc-key" onclick="inputNum('3')">3</button>
                 <button class="calc-key op-key" onclick="inputOp('-')" aria-label="Minus">-</button>
 
-                <!-- Row 5: Numpad 0 | Dot | Equals (Spans 2) | Plus -->
+                <!-- Row 5: Advanced Math | Numpad 0 | Dot | Equals | Basic Op -->
+                <button class="calc-key op-key" onclick="inputConst('Math.PI')" aria-label="Pi constant">π</button>
                 <button class="calc-key" onclick="inputNum('0')">0</button>
                 <button class="calc-key" onclick="inputNum('.')">.</button>
-                <button class="calc-key action-key" onclick="calculate()" style="grid-column: span 2; background: #00FFCC; color: #121212;" aria-label="Calculate equals">=</button>
+                <button class="calc-key action-key" onclick="calculate()" style="background: #00FFCC; color: #121212;" aria-label="Calculate equals">=</button>
                 <button class="calc-key op-key" onclick="inputOp('+')" aria-label="Plus">+</button>
             </div>
         </main>
@@ -196,6 +197,21 @@
             announce("Cleared screen");
         }
 
+        function backspace() {
+            let val = calcDisplay.value.trim();
+            if (val.length > 0 && val !== "0") {
+                let lastChar = val.substring(val.length - 1);
+                calcDisplay.value = calcDisplay.value.slice(0, -1);
+                if(calcDisplay.value === "" || calcDisplay.value === " ") {
+                    calcDisplay.value = "0";
+                }
+                currentInput = currentInput.slice(0, -1);
+                announce("Deleted " + (lastChar === " " ? "operator" : lastChar));
+            } else {
+                announce("Nothing to delete");
+            }
+        }
+
         function calculate() {
             try {
                 const res = eval(currentInput);
@@ -216,7 +232,7 @@
             const out = document.getElementById('quad-result');
 
             if (isNaN(a) || isNaN(b) || isNaN(c)) {
-                out.textContent = "Error: Please fill all coefficient fields completely.";
+                out.textContent = "Error: Please fill all fields.";
                 announce(out.textContent);
                 return;
             }
@@ -231,10 +247,10 @@
             if (disc > 0) {
                 let r1 = (-b + Math.sqrt(disc)) / (2*a);
                 let r2 = (-b - Math.sqrt(disc)) / (2*a);
-                finalStr = "Two distinct real roots: Root 1 = " + r1.toFixed(3) + ", Root 2 = " + r2.toFixed(3);
+                finalStr = "Two real roots: Root 1 = " + r1.toFixed(3) + ", Root 2 = " + r2.toFixed(3);
             } else if (disc === 0) {
                 let r = -b / (2*a);
-                finalStr = "One repeated real root: Root = " + r.toFixed(3);
+                finalStr = "One repeated root: Root = " + r.toFixed(3);
             } else {
                 let realPart = (-b / (2*a)).toFixed(3);
                 let imagPart = (Math.sqrt(-disc) / (2*a)).toFixed(3);
@@ -252,7 +268,7 @@
             const out = document.getElementById('cubic-result');
 
             if (isNaN(a) || isNaN(b) || isNaN(c) || isNaN(d)) {
-                out.textContent = "Error: Please fill all cubic coefficient fields.";
+                out.textContent = "Error: Please fill all fields.";
                 announce(out.textContent);
                 return;
             }
@@ -273,10 +289,10 @@
                 let T = -(g/2) - Math.sqrt(h);
                 let U = Math.cbrt(T);
                 let r1 = (S + U) - (b/(3*a));
-                finalStr = "One real root: Root 1 = " + r1.toFixed(3) + " (Remaining roots are complex)";
+                finalStr = "One real root: Root 1 = " + r1.toFixed(3);
             } else if (f === 0 && g === 0 && h === 0) {
                 let r = -Math.cbrt(d/a);
-                finalStr = "Triple real root: Root = " + r.toFixed(3);
+                finalStr = "Triple root: Root = " + r.toFixed(3);
             } else {
                 let i = Math.sqrt((g*g)/4 - h);
                 let j = Math.cbrt(i);
@@ -289,7 +305,7 @@
                 let r1 = 2*j*Math.cos(k/3) - (b/(3*a));
                 let r2 = L * (M + N) + P;
                 let r3 = L * (M - N) + P;
-                finalStr = "Three distinct real roots: Root 1 = " + r1.toFixed(3) + ", Root 2 = " + r2.toFixed(3) + ", Root 3 = " + r3.toFixed(3);
+                finalStr = "Three real roots: R1 = " + r1.toFixed(3) + ", R2 = " + r2.toFixed(3) + ", R3 = " + r3.toFixed(3);
             }
             out.textContent = finalStr;
             announce(finalStr);
