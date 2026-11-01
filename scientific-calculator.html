@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VI Accessible Advanced Scientific & Equation Suite</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #121212; color: #FFFFFF; padding: 30px; margin: 0; }
+        .wrapper { max-width: 650px; margin: 0 auto; }
+        
+        .tab-container { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { flex: 1; padding: 15px; font-size: 1.2rem; font-weight: bold; background: #2A2A2A; color: #00FFCC; border: 3px solid #00FFCC; border-radius: 8px; cursor: pointer; }
+        .tab-btn.active { background: #00FFCC; color: #121212; border-color: #FFFFFF; }
+        .tab-btn:focus { outline: 4px solid #FFFF00; }
+
+        .module-panel { background: #1E1E1E; border: 4px solid #FFFFFF; padding: 25px; border-radius: 12px; display: none; }
+        .module-panel.active { display: block; }
+
+        .display { width: 100%; height: 70px; font-size: 2.2rem; text-align: right; background: #000000; color: #FFFF00; border: 3px solid #FFFF00; padding: 10px; box-sizing: border-box; margin-bottom: 20px; font-family: monospace; }
+        
+        /* 5 Perfectly balanced columns */
+        .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+        
+        button.calc-key { padding: 18px 10px; font-size: 1.4rem; font-weight: bold; background: #2D2D2D; color: #FFFFFF; border: 2px solid #888888; border-radius: 8px; cursor: pointer; }
+        button.calc-key:focus, input:focus { outline: 5px solid #FFFF00 !important; background: #444444; }
+        button.op-key { background: #3A2A00; color: #FFFF00; border-color: #FFFF00; }
+        button.action-key { background: #004433; color: #00FFCC; border-color: #00FFCC; }
+        button.trig-key { background: #1A2F4C; color: #80D0FF; border-color: #80D0FF; }
+
+        .eq-row { display: flex; align-items: center; gap: 10px; font-size: 1.5rem; margin-bottom: 15px; }
+        .eq-input { width: 80px; padding: 10px; font-size: 1.4rem; background: #000; color: #FFFF00; border: 2px solid #FFFF00; text-align: center; border-radius: 6px; }
+        .solve-btn { width: 100%; padding: 18px; font-size: 1.4rem; background: #00FFCC; color: #121212; border: 3px solid #FFFFFF; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 15px; }
+        .result-box { margin-top: 20px; padding: 15px; background: #000; border: 2px dashed #00FFCC; font-size: 1.4rem; color: #00FFCC; min-height: 40px; }
+
+        .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0; }
+    </style>
+</head>
+<body>
+
+    <div class="wrapper">
+        <header>
+            <h1 style="text-align: center; color: #00FFCC; font-size: 2.2rem; margin-bottom: 5px;">Accessible Virtual Lab Workspace</h1>
+            <p style="text-align: center; color: #AAA; margin-bottom: 25px;">Optimized for Screen Readers and High-Contrast Keyboard Navigation</p>
+        </header>
+
+        <nav class="tab-container" role="tablist" aria-label="Calculator Mode Options">
+            <button id="tab-calc" class="tab-btn active" role="tab" aria-selected="true" aria-controls="panel-calc" onclick="switchTab('calc')">Scientific Calc</button>
+            <button id="tab-quad" class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-quad" onclick="switchTab('quad')">Quadratic Solver</button>
+            <button id="tab-cubic" class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-cubic" onclick="switchTab('cubic')">Cubic Solver</button>
+        </nav>
+
+        <div id="global-announcer" class="sr-only" aria-live="assertive" aria-atomic="true"></div>
+
+        <!-- MODULE 1: SCIENTIFIC CALCULATOR -->
+        <main id="panel-calc" class="module-panel active" role="tabpanel" aria-labelledby="tab-calc">
+            <input type="text" id="calc-display" class="display" readonly aria-label="Calculator screen display" value="0">
+            <div class="grid">
+                <!-- Row 1: Advanced Functions & Clear Header -->
+                <button class="calc-key trig-key" onclick="inputFunc('sin')" aria-label="Sine">sin</button>
+                <button class="calc-key trig-key" onclick="inputFunc('cos')" aria-label="Cosine">cos</button>
+                <button class="calc-key trig-key" onclick="inputFunc('tan')" aria-label="Tangent">tan</button>
+                <button class="calc-key trig-key" onclick="inputFunc('log')" aria-label="Logarithm base 10">log</button>
+                <button class="calc-key action-key" onclick="clearDisplay()" aria-label="Clear all content">Clear</button>
+
+                <!-- Row 2: Scientific Operator | Numpad 7-8-9 | Divide -->
+                <button class="calc-key op-key" onclick="inputFunc('sqrt')" aria-label="Square Root">√</button>
+                <button class="calc-key" onclick="inputNum('7')">7</button>
+                <button class="calc-key" onclick="inputNum('8')">8</button>
+                <button class="calc-key" onclick="inputNum('9')">9</button>
+                <button class="calc-key op-key" onclick="inputOp('/')" aria-label="Divided by">/</button>
+
+                <!-- Row 3: Scientific Operator | Numpad 4-5-6 | Multiply -->
+                <button class="calc-key op-key" onclick="inputOp('**')" aria-label="Raised to the power of">^</button>
+                <button class="calc-key" onclick="inputNum('4')">4</button>
+                <button class="calc-key" onclick="inputNum('5')">5</button>
+                <button class="calc-key" onclick="inputNum('6')">6</button>
+                <button class="calc-key op-key" onclick="inputOp('*')" aria-label="Multiplied by">×</button>
+
+                <!-- Row 4: Scientific Operator | Numpad 1-2-3 | Minus -->
+                <button class="calc-key op-key" onclick="inputConst('Math.PI')" aria-label="Pi constant">π</button>
+                <button class="calc-key" onclick="inputNum('1')">1</button>
+                <button class="calc-key" onclick="inputNum('2')">2</button>
+                <button class="calc-key" onclick="inputNum('3')">3</button>
+                <button class="calc-key op-key" onclick="inputOp('-')" aria-label="Minus">-</button>
+
+                <!-- Row 5: Numpad 0 | Dot | Equals (Spans 2) | Plus -->
+                <button class="calc-key" onclick="inputNum('0')">0</button>
+                <button class="calc-key" onclick="inputNum('.')">.</button>
+                <button class="calc-key action-key" onclick="calculate()" style="grid-column: span 2; background: #00FFCC; color: #121212;" aria-label="Calculate equals">=</button>
+                <button class="calc-key op-key" onclick="inputOp('+')" aria-label="Plus">+</button>
+            </div>
+        </main>
+
+        <!-- MODULE 2: QUADRATIC SOLVER -->
+        <section id="panel-quad" class="module-panel" role="tabpanel" aria-labelledby="tab-quad">
+            <h2 style="color: #00FFCC; margin-top: 0;">Quadratic Solver (ax² + bx + c = 0)</h2>
+            <p style="color: #BBB;">Enter coefficients:</p>
+            <div class="eq-row">
+                <input type="number" id="quad-a" class="eq-input" aria-label="Coefficient a"> <span>x² +</span>
+                <input type="number" id="quad-b" class="eq-input" aria-label="Coefficient b"> <span>x +</span>
+                <input type="number" id="quad-c" class="eq-input" aria-label="Constant term c"> <span>= 0</span>
+            </div>
+            <button class="solve-btn" onclick="solveQuadratic()">Solve Quadratic Equation</button>
+            <div id="quad-result" class="result-box" role="status" aria-live="polite">Roots will display here.</div>
+        </section>
+
+        <!-- MODULE 3: CUBIC SOLVER -->
+        <section id="panel-cubic" class="module-panel" role="tabpanel" aria-labelledby="tab-cubic">
+            <h2 style="color: #00FFCC; margin-top: 0;">Cubic Solver (ax³ + bx² + cx + d = 0)</h2>
+            <p style="color: #BBB;">Enter coefficients:</p>
+            <div class="eq-row" style="flex-wrap: wrap;">
+                <input type="number" id="cubic-a" class="eq-input" aria-label="Coefficient a"> <span>x³ +</span>
+                <input type="number" id="cubic-b" class="eq-input" aria-label="Coefficient b"> <span>x² +</span>
+                <input type="number" id="cubic-c" class="eq-input" aria-label="Coefficient c"> <span>x +</span>
+                <input type="number" id="cubic-d" class="eq-input" aria-label="Constant term d"> <span>= 0</span>
+            </div>
+            <button class="solve-btn" onclick="solveCubic()">Solve Cubic Equation</button>
+            <div id="cubic-result" class="result-box" role="status" aria-live="polite">Roots will display here.</div>
+        </section>
+    </div>
+    <script>
+        const announcer = document.getElementById('global-announcer');
+        const calcDisplay = document.getElementById('calc-display');
+        let currentInput = "";
+
+        function announce(msg) {
+            announcer.textContent = "";
+            setTimeout(() => { announcer.textContent = msg; }, 80);
+        }
+
+        function switchTab(type) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.module-panel').forEach(panel => panel.classList.remove('active'));
+            
+            if(type === 'calc') {
+                document.getElementById('tab-calc').classList.add('active');
+                document.getElementById('panel-calc').classList.add('active');
+                announce("Switched to Scientific Calculator tab");
+            } else if(type === 'quad') {
+                document.getElementById('tab-quad').classList.add('active');
+                document.getElementById('panel-quad').classList.add('active');
+                announce("Switched to Quadratic Equation Solver tab");
+            } else if(type === 'cubic') {
+                document.getElementById('tab-cubic').classList.add('active');
+                document.getElementById('panel-cubic').classList.add('active');
+                announce("Switched to Cubic Equation Solver tab");
+            }
+        }
+
+        function inputNum(num) {
+            if (calcDisplay.value === "0") calcDisplay.value = "";
+            calcDisplay.value += num;
+            currentInput += num;
+            announce(num);
+        }
+
+        function inputOp(op) {
+            let reading = op === '**' ? "power" : (op === '*' ? "times" : (op === '/' ? "divided by" : op));
+            calcDisplay.value += " " + op + " ";
+            currentInput += op;
+            announce(reading);
+        }
+
+        function inputFunc(func) {
+            announce(func);
+            if(func === 'sqrt') {
+                currentInput = "Math.sqrt(" + (currentInput || "0") + ")";
+                calcDisplay.value = "√(" + calcDisplay.value + ")";
+            } else if(func === 'sin') {
+                currentInput = "Math.sin(" + (currentInput || "0") + ")";
+                calcDisplay.value = "sin(" + calcDisplay.value + ")";
+            } else if(func === 'cos') {
+                currentInput = "Math.cos(" + (currentInput || "0") + ")";
+                calcDisplay.value = "cos(" + calcDisplay.value + ")";
+            } else if(func === 'tan') {
+                currentInput = "Math.tan(" + (currentInput || "0") + ")";
+                calcDisplay.value = "tan(" + calcDisplay.value + ")";
+            } else if(func === 'log') {
+                currentInput = "Math.log10(" + (currentInput || "0") + ")";
+                calcDisplay.value = "log(" + calcDisplay.value + ")";
+            }
+        }
+
+        function inputConst(constant) {
+            if (constant === 'Math.PI') {
+                announce("Pi");
+                if (calcDisplay.value === "0") calcDisplay.value = "";
+                calcDisplay.value += "π";
+                currentInput += "Math.PI";
+            }
+        }
+
+        function clearDisplay() {
+            calcDisplay.value = "0";
+            currentInput = "";
+            announce("Cleared screen");
+        }
+
+        function calculate() {
+            try {
+                const res = eval(currentInput);
+                calcDisplay.value = res;
+                currentInput = res.toString();
+                announce("Result equals " + res);
+            } catch(e) {
+                calcDisplay.value = "Error";
+                currentInput = "";
+                announce("Calculation statement error");
+            }
+        }
+
+        function solveQuadratic() {
+            const a = parseFloat(document.getElementById('quad-a').value);
+            const b = parseFloat(document.getElementById('quad-b').value);
+            const c = parseFloat(document.getElementById('quad-c').value);
+            const out = document.getElementById('quad-result');
+
+            if (isNaN(a) || isNaN(b) || isNaN(c)) {
+                out.textContent = "Error: Please fill all coefficient fields completely.";
+                announce(out.textContent);
+                return;
+            }
+            if (a === 0) {
+                out.textContent = "Error: 'a' cannot be zero.";
+                announce(out.textContent);
+                return;
+            }
+
+            const disc = b*b - 4*a*c;
+            let finalStr = "";
+            if (disc > 0) {
+                let r1 = (-b + Math.sqrt(disc)) / (2*a);
+                let r2 = (-b - Math.sqrt(disc)) / (2*a);
+                finalStr = "Two distinct real roots: Root 1 = " + r1.toFixed(3) + ", Root 2 = " + r2.toFixed(3);
+            } else if (disc === 0) {
+                let r = -b / (2*a);
+                finalStr = "One repeated real root: Root = " + r.toFixed(3);
+            } else {
+                let realPart = (-b / (2*a)).toFixed(3);
+                let imagPart = (Math.sqrt(-disc) / (2*a)).toFixed(3);
+                finalStr = "Complex roots: " + realPart + " + " + imagPart + "i and " + realPart + " - " + imagPart + "i";
+            }
+            out.textContent = finalStr;
+            announce(finalStr);
+        }
+
+        function solveCubic() {
+            const a = parseFloat(document.getElementById('cubic-a').value);
+            const b = parseFloat(document.getElementById('cubic-b').value);
+            const c = parseFloat(document.getElementById('cubic-c').value);
+            const d = parseFloat(document.getElementById('cubic-d').value);
+            const out = document.getElementById('cubic-result');
+
+            if (isNaN(a) || isNaN(b) || isNaN(c) || isNaN(d)) {
+                out.textContent = "Error: Please fill all cubic coefficient fields.";
+                announce(out.textContent);
+                return;
+            }
+            if (a === 0) {
+                out.textContent = "Error: 'a' cannot be zero.";
+                announce(out.textContent);
+                return;
+            }
+
+            let f = (3*c/a - (b*b)/(a*a)) / 3;
+            let g = (2*(b*b*b)/(a*a*a) - 9*b*c/(a*a) + 27*d/a) / 27;
+            let h = (g*g)/4 + (f*f*f)/27;
+
+            let finalStr = "";
+            if (h > 0) {
+                let R = -(g/2) + Math.sqrt(h);
+                let S = Math.cbrt(R);
+                let T = -(g/2) - Math.sqrt(h);
+                let U = Math.cbrt(T);
+                let r1 = (S + U) - (b/(3*a));
+                finalStr = "One real root: Root 1 = " + r1.toFixed(3) + " (Remaining roots are complex)";
+            } else if (f === 0 && g === 0 && h === 0) {
+                let r = -Math.cbrt(d/a);
+                finalStr = "Triple real root: Root = " + r.toFixed(3);
+            } else {
+                let i = Math.sqrt((g*g)/4 - h);
+                let j = Math.cbrt(i);
+                let k = Math.acos(-(g / (2*i)));
+                let L = j * -1;
+                let M = Math.cos(k/3);
+                let N = Math.sqrt(3) * Math.sin(k/3);
+                let P = (b / (3*a)) * -1;
+                
+                let r1 = 2*j*Math.cos(k/3) - (b/(3*a));
+                let r2 = L * (M + N) + P;
+                let r3 = L * (M - N) + P;
+                finalStr = "Three distinct real roots: Root 1 = " + r1.toFixed(3) + ", Root 2 = " + r2.toFixed(3) + ", Root 3 = " + r3.toFixed(3);
+            }
+            out.textContent = finalStr;
+            announce(finalStr);
+        }
+    </script>
+</body>
+</html>
